@@ -1,3 +1,5 @@
 require 'awesome_print'
 require 'debugger'
 require 'robots'
+require 'xmlsimple'
+require 'time_diff'
