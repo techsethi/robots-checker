@@ -54,17 +54,7 @@ class Robots
       allowed = true
       path = uri.request_uri
       
-      @disallows.each do |key, value|
-        if user_agent =~ key
-          value.each do |rule|
-            if path =~ rule
-              allowed = false
-            end
-          end
-        end
-      end
-      
-      @allows.each do |key, value|
+        @allows.each do |key, value|
         unless allowed      
           if user_agent =~ key
             value.each do |rule|
@@ -76,6 +66,16 @@ class Robots
         end
       end
       
+      @disallows.each do |key, value|
+        if user_agent =~ key
+          value.each do |rule|
+            if path =~ rule
+              allowed = false
+            end
+          end
+        end
+      end
+
       if allowed && @delays[user_agent]
         sleep @delays[user_agent] - (Time.now - @last_accessed)
         @last_accessed = Time.now
