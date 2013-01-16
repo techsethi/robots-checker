@@ -102,9 +102,3 @@ Given I read robots.txt at "www.timescity.com" as "googlebot"
 When I lookup for "http://timescity.com/estsrp.php?bytags=info@jyotinivas.org"
 Then It should not be allowed for crawling
 
-Scenario: To verify new entry in sitemap at robots.txt
-
-Given I read robots.txt at "www.timescity.com" as "googlebot"
-When I count number of sitemaps listed in robots.txt of "http://timescity.com"
-Then The count of sitemaps is greater than 11
-
