@@ -2,6 +2,8 @@
 use strict;
 use Net::SMTP;
 use MIME::Lite;
+use JSON;
+use Data::Dumper;
 
 my $log_dir = "/opt/robots-checker/logs";
 
@@ -18,18 +20,10 @@ print "Running : /usr/local/bin/cucumber -f html > $log_file\n";
 
 my $return_val = `/usr/local/bin/cucumber -f html` ;
 
-my $re='(\d+) scenarious .*?(\d+).*?(\d+).*?(\d+)';
-my $summary = "Could not fetch summary";
+my @data = `/usr/local/bin/cucumber ` ;
 
-if ($return_val =~ m/$re/isg)
-{
-    my $int1=$1;
-    my $int2=$2;
-    my $int3=$3;
-    my $int4=$4;
-    print "($int1) ($int2) ($int3) ($int4) \n";
-    $summary = "$int1 Scenarios\n$int2 passed\n$int3 Steps\n$int4 passed.";
-}
+
+my $summary = $data[-3] . "\n" . $data[-2] . "\n" .  $data[-1] ;
 
 print "Summary: $summary\n";
 
@@ -56,8 +50,8 @@ close LOG;
     # Header
 my    $msg = MIME::Lite->new(
                             From    => 'pradeep.sethi@indiatimes.co.in',
-                            To      => 'pradeep.sethi@indiatimes.co.in',
-                            Subject => 'Mongoose output : ' . $timestamp,
+                            To      => 'tc-dev@indiatimes.co.in, tc-qa@indiatimes.co.in, anushrav.gulati@indiatimes.co.in',
+                            Subject => 'Robots Checker output : ' . $timestamp,
                             Type    =>'multipart/mixed',
                             Debug   => 1
 			   );
@@ -70,7 +64,7 @@ my    $msg = MIME::Lite->new(
     $msg->attach(
                 Type     => 'application/zip',
                 Path     => "$log_file.gz",
-                Filename => "mongoose_report_compressed.html.gz",
+                Filename => "mongoose_detailed_report.html.gz",
                 Disposition => 'attachment'
 		 );
 
