@@ -117,7 +117,6 @@ class Robots
   end
   
   def initialize(user_agent)
-    p "I am in initialize"
     @user_agent = user_agent
     @parsed = {}
   end
