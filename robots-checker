@@ -1,23 +1,33 @@
 #!perl -w
 use strict;
 use Net::SMTP;
+use MIME::Lite;
+use JSON;
+use Data::Dumper;
 
-my $log_dir = "./logs";
+my $log_dir = "/opt/robots-checker/logs";
 
 my ($sec, $min, $hr, $day, $mon, $year) = localtime;
 
 my $timestamp = sprintf("%02d_%02d_%04d_%02d_%02d_%02d\n", $day, $mon + 1, 1900 + $year, $hr, $min, $sec);
 
-my $log_file = "$log_dir/mongoose.log.$timestamp";
+my $log_file = "$log_dir/mongoose.log.$timestamp.html";
 
 $log_file =~ s/\s+//g;
 $log_file =~ s/\\/_/g;
 
-print "Running : cucumber -f html > $log_file\n";
+print "Running : /usr/local/bin/cucumber -f html > $log_file\n";
 
-my $return_val = `cucumber -f html` ;
+my $return_val = `/usr/local/bin/cucumber -f html` ;
 
-print "Return val : $return_val" ;
+my @data = `/usr/local/bin/cucumber ` ;
+
+
+my $summary = $data[-3] . "\n" . $data[-2] . "\n" .  $data[-1] ;
+
+print "Summary: $summary\n";
+
+# print "Return val : $return_val" ;
 
 $return_val =~ s/<title>Cucumber<\/title>/<title>Timescity Mongoose ($timestamp)<\/title>/;
 
@@ -27,18 +37,38 @@ open (LOG, "> $log_file") || die "Could not open log file for writing : $!";
 print LOG $return_val;
 close LOG;
 
+# now zip the file
+
+`gzip $log_file`;
+
+# $log_file =~ s/\//\\\//g;
+
+
 ## =========
-my $smtp = Net::SMTP->new("smtp.gmail.com", Debug => 1 );
- 
-$smtp->mail("pradeep.sethi\@indiatimes.co.in");
-$smtp->to("pradeep.sethi\@indiatimes.co.in");
+    # Set the fields required by Mailer...
+    # ... and send it
+    # Header
+my    $msg = MIME::Lite->new(
+                            From    => 'pradeep.sethi@indiatimes.co.in',
+                            To      => 'tc-dev@indiatimes.co.in, tc-qa@indiatimes.co.in, anushrav.gulati@indiatimes.co.in',
+                            Subject => 'Robots Checker output : ' . $timestamp,
+                            Type    =>'multipart/mixed',
+                            Debug   => 1
+			   );
+    # Body Content
+    $msg->attach(
+                Type     => 'TEXT',
+                Data     => $summary
+		 );
+    # Attachment
+    $msg->attach(
+                Type     => 'application/zip',
+                Path     => "$log_file.gz",
+                Filename => "mongoose_detailed_report.html.gz",
+                Disposition => 'attachment'
+		 );
 
-$smtp->data();
-$smtp->datasend("Subject: Mongoose Output : $timestamp\r\n");
-$smtp->datasend("\n");
+MIME::Lite->send ('smtp', 'cmailer.indiatimes.com');
+$msg->send;
 
-$smtp->datasend($return_val);
 
-$smtp->dataend();
-
-$smtp->quit;
