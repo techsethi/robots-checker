@@ -60,4 +60,10 @@ Given I am reading lastmod time of xml file of "4" entry of "2" sitemap
 When I compare the difference between now & the timestamp
 Then The difference should be less than "24" hours
 
+Scenario: Timescity Blog is open for crawling
+
+Given I read robots.txt at "timescity.com" as "googlebot"
+When I lookup for "http://timescity.com/blog"
+Then It should be allowed for crawling
+
 
