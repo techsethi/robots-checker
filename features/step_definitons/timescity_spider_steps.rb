@@ -48,3 +48,4 @@ Then /^The difference should be less than "(.*?)" hours$/ do |arg1|
     raise "Sitemaps were generated #{@time_diffs[:hour]} hours ago."
   end
 end
+
