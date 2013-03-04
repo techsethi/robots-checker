@@ -101,10 +101,12 @@ class Robots
   def self.get_robots_txt(uri, user_agent)
     begin
       Timeout::timeout(Robots.timeout) do
-        io = URI.join(uri.to_s, "/robots.txt").open("User-Agent" => user_agent) rescue nil
+        io = URI.join(uri.to_s, "/robots.txt").open("User-Agent" => user_agent)
       end 
     rescue Timeout::Error
       STDERR.puts "robots.txt request timed out"
+    rescue Exception => msg  
+        puts msg
     end
   end
   
